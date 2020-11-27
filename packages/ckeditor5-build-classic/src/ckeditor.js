@@ -32,21 +32,14 @@ import TableToolbar from '@ckeditor/ckeditor5-table/src/tabletoolbar';
 import TextTransformation from '@ckeditor/ckeditor5-typing/src/texttransformation';
 import Base64UploadAdapter from '@ckeditor/ckeditor5-upload/src/adapters/base64uploadadapter';
 import ImageResize from '@ckeditor/ckeditor5-image/src/imageresize';
-
-import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
-import { createDropdown } from '@ckeditor/ckeditor5-ui/src/dropdown/utils';
-
-import textIcon from '../src/plugins/standardtekst/icons/text.svg';
-import folderIcon from '../src/plugins/standardtekst/icons/folder.svg';
-
-import View from '@ckeditor/ckeditor5-ui/src/view';
+import Standardtekster from '../src/plugins/standardtekster/standardtekster';
 
 export default class ClassicEditor extends ClassicEditorBase {
 }
 
 ClassicEditor.settStandardTekster = function(mapper) {
 	ClassicEditor.defaultConfig.toolbar.items.push('standardtekster');
-	ClassicEditor.standardtekstMapper = mapper;
+	Standardtekster.standardtekstMapper = mapper;
 };
 
 // Plugins to include in the build.
@@ -100,12 +93,9 @@ ClassicEditor.defaultConfig = {
 			'alignment:left', 'alignment:center', 'alignment:right', 'alignment:justify',
 			'|',
 			'imageUpload',
-			//'blockQuote',
 			'insertTable',
-			// 'mediaEmbed',
 			'undo',
-			'redo',
-			//'standardtekster'
+			'redo'
 		]
 	},
 	image: {
@@ -126,178 +116,3 @@ ClassicEditor.defaultConfig = {
 	// This value must be kept in sync with the language defined in webpack.config.js.
 	language: 'nb'
 };
-
-
-class Standardtekster extends Plugin {
-	static get pluginName() {
-        return 'Standardtekster';
-    }
-    
-    init() {
-		console.log("Standardtekster plugin init");
-        const editor = this.editor;
-        const t = editor.t;
-
-        // Register UI component
-        editor.ui.componentFactory.add('standardTekster', locale => {
-
-			//const command = editor.commands.get( 'insertTable' );
-			const dropdownView = createDropdown( locale );
-
-			//dropdownView.bind( 'isEnabled' ).to( command );
-
-			// Decorate dropdown's button.
-			dropdownView.buttonView.set( {
-				icon: textIcon,
-				label: t( 'Sett inn standardtekst' ),
-				tooltip: true
-			} );
-
-			let stdTextView;
-
-			dropdownView.on( 'change:isOpen', () => {
-				if ( stdTextView ) {
-					return;
-				}
-
-				function toggleFolder(event) {
-					console.log('toggleFolder', event.target);
-					event.target.classList.toggle('open');
-
-					var uls = event.target.getElementsByTagName('ul');
-
-					if (uls.length > 0) {
-						uls[0].classList.toggle('hidden');
-					}
-					
-					event.cancelBubble = true;
-				}
-				
-				function clickText(event) {
-					console.log('Text clicked: ' + this.innerText);
-
-					var content = this.getAttribute("data-content");
-					console.log('content: ' + content);
-
-					const viewFragment = editor.data.processor.toView( content );
-					const modelFragment = editor.data.toModel( viewFragment );
-
-					editor.model.insertContent( modelFragment );
-
-					dropdownView.isOpen = false;
-
-					editor.editing.view.focus();
-
-					event.cancelBubble = true;
-				}
-
-				// Prepare custom view for dropdown's panel.
-				stdTextView = new StandardteksterView(locale, ClassicEditor.standardtekstMapper);
-				dropdownView.panelView.children.add( stdTextView );
-
-				stdTextView.delegate( 'execute' ).to( dropdownView );
-
-				const folderNodes = document.getElementsByClassName('folder');
-				for (var i=0; i < folderNodes.length; i++) {
-					var node = folderNodes[i];
-					node.addEventListener('click', toggleFolder, false);
-				}
-
-				const standardtextNodes = document.getElementsByClassName('standardtext');
-				for (var i=0; i < standardtextNodes.length; i++) {
-					var node = standardtextNodes[i];
-					node.addEventListener('click', clickText, false);
-				}
-
-				dropdownView.on( 'execute', () => {
-					console.log('drowpdownview execute');
-					//editor.execute( 'insertTable', { rows: stdTextView.rows, columns: stdTextView.columns } );
-					editor.editing.view.focus();
-				} );
-			} );
-
-			return dropdownView;
-        });
-    }
-}
-
-class StandardteksterView extends View {
-
-	constructor(locale, mapper) {
-		super(locale);
-
-		console.log('StdTextView', mapper);
-
-		var styleContent = '<style>\
-		li > ul {\
-			padding-left: 20px !important;\
-		}\
-		li {\
-			overflow: hidden !important;\
-			padding: 2px 5px 2px 5px !important;\
-		}\
-		.standardtext {\
-			font-style: normal;\
-			font-weight: normal;\
-		}\
-		li.standardtekst:hover {\
-			background: #E0E0FF !important;\
-		}\
-		.hidden {\
-			display: none;\
-		}\
-		.open {\
-			font-style: italic !important;\
-			font-weight: bold !important;\
-		}\
-		.dropdown-container {\
-			padding: 5px !important;\
-		}\
-		</style>';
-		
-		function lagMappeHtml(mappen) {
-			var tmp = '<li class="folder closed">' + folderIcon + mappen.navn;
-			
-			if (mappen.mapper.length > 0 || mappen.standardTekster.length > 0)
-				tmp += '<ul class="folder-content hidden">';
-			for (var j = 0; j < mappen.mapper.length; j++) {
-				tmp += lagMappeHtml(mappen.mapper[j]);
-			}
-			
-			for (var k = 0; k < mappen.standardTekster.length; k++) {
-				tmp += lagTekstHtml(mappen.standardTekster[k]);
-			}
-
-			if (mappen.mapper.length > 0 || mappen.standardTekster.length > 0)
-				tmp += '</ul>';
-
-			tmp += '</li>';
-
-			return tmp;
-		}
-
-		function lagTekstHtml(tekst) {
-			return '<li data-content="' + tekst.innhold + '" class="standardtext">' + textIcon + tekst.navn + '</li>';
-		}
-
-		var htmlContent = '<ul>';
-	
-		for (var i = 0; i < mapper.length; i++) {
-			var mappe = mapper[i];
-			htmlContent += lagMappeHtml(mappe);
-		}
-	
-		htmlContent += '</ul>';
-	
-		var enDiv = document.createElement('div');
-		enDiv.innerHTML = styleContent + htmlContent;
-
-		this.setTemplate({
-			tag: 'div',				
-			children: [enDiv],
-			attributes: {
-				class: ['dropdown-container']
-			}
-		});
-	}
-}
