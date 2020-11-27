@@ -36,7 +36,9 @@ import ImageResize from '@ckeditor/ckeditor5-image/src/imageresize';
 import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
 import { createDropdown } from '@ckeditor/ckeditor5-ui/src/dropdown/utils';
 
-import imageIcon from '@ckeditor/ckeditor5-core/theme/icons/three-vertical-dots.svg';
+import textIcon from '../src/plugins/standardtekst/icons/text.svg';
+import folderIcon from '../src/plugins/standardtekst/icons/folder.svg';
+
 import View from '@ckeditor/ckeditor5-ui/src/view';
 
 export default class ClassicEditor extends ClassicEditorBase {
@@ -146,7 +148,7 @@ class Standardtekster extends Plugin {
 
 			// Decorate dropdown's button.
 			dropdownView.buttonView.set( {
-				icon: imageIcon,
+				icon: textIcon,
 				label: t( 'Sett inn standardtekst' ),
 				tooltip: true
 			} );
@@ -232,6 +234,7 @@ class StandardteksterView extends View {
 		}\
 		li {\
 			overflow: hidden !important;\
+			padding: 2px 5px 2px 5px !important;\
 		}\
 		.standardtext {\
 			font-style: normal;\
@@ -247,13 +250,13 @@ class StandardteksterView extends View {
 			font-style: italic !important;\
 			font-weight: bold !important;\
 		}\
-		.dropdown-padding {\
-			padding: 0px 10px 0px 10px !important;\
+		.dropdown-container {\
+			padding: 5px !important;\
 		}\
 		</style>';
 		
 		function lagMappeHtml(mappen) {
-			var tmp = '<li class="folder closed">' + mappen.navn;
+			var tmp = '<li class="folder closed">' + folderIcon + mappen.navn;
 			
 			if (mappen.mapper.length > 0 || mappen.standardTekster.length > 0)
 				tmp += '<ul class="folder-content hidden">';
@@ -274,7 +277,7 @@ class StandardteksterView extends View {
 		}
 
 		function lagTekstHtml(tekst) {
-			return '<li data-content="' + tekst.innhold + '" class="standardtext">' + tekst.navn + '</li>';
+			return '<li data-content="' + tekst.innhold + '" class="standardtext">' + textIcon + tekst.navn + '</li>';
 		}
 
 		var htmlContent = '<ul>';
@@ -293,7 +296,7 @@ class StandardteksterView extends View {
 			tag: 'div',				
 			children: [enDiv],
 			attributes: {
-				class: ['dropdown-padding']
+				class: ['dropdown-container']
 			}
 		});
 	}
