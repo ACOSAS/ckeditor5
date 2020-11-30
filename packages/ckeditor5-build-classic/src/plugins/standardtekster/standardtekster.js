@@ -130,59 +130,92 @@ class StandardteksterView extends View {
 		}
 		</style>`;
 
-		function escapeHtml(str) {
-			const node = document.createElement('span');
-			node.textContent = str;
-			return node.innerHTML;
+		function createFolderClosedIcon() {
+			var elem = document.createElement('span');
+			elem.classList.add("folder-icon");
+			elem.innerHTML = folderIcon;
+			return elem;
+		}
+
+		function createFolderOpenIcon() {
+			var elem = document.createElement('span');
+			elem.classList.add("folder-icon", "hidden");
+			elem.innerHTML = folderOpenIcon;
+			return elem;
 		}
 		
-		function lagMappeHtml(mappen) {
-			var tmp = '<li class="folder closed">' + 
-				'<span class="actionBtn">' +
-                '<span class="folder-icon">' + folderIcon + '</span>' + 
-                '<span class="folder-icon hidden">' + folderOpenIcon + '</span>' + 
-				'<span>' + escapeHtml(mappen.navn) + '</span>' +
-				'</span>';
-			
-			if (mappen.mapper.length > 0 || mappen.standardTekster.length > 0)
-				tmp += '<ul class="folder-content hidden">';
-			for (var j = 0; j < mappen.mapper.length; j++) {
-				tmp += lagMappeHtml(mappen.mapper[j]);
-			}
-			
-			for (var k = 0; k < mappen.standardTekster.length; k++) {
-				tmp += lagTekstHtml(mappen.standardTekster[k]);
-			}
-
-			if (mappen.mapper.length > 0 || mappen.standardTekster.length > 0)
-				tmp += '</ul>';
-
-			tmp += '</li>';
-
-			return tmp;
+		function createTextIcon() {
+			var elem = document.createElement('span');
+			elem.innerHTML = textIcon;
+			return elem;
+		}
+		
+		function createFolderButton(name) {
+			var btn = document.createElement('span');
+			btn.classList.add("actionBtn");
+			btn.appendChild(createFolderClosedIcon());
+			btn.appendChild(createFolderOpenIcon());
+			btn.appendChild(createTextSpan(name));
+			return btn;
+		}
+				
+		function createTextButton(name) {
+			var btn = document.createElement('span');
+			btn.classList.add("actionBtn");
+			btn.appendChild(createTextIcon());
+			btn.appendChild(createTextSpan(name));
+			return btn;
 		}
 
-		function lagTekstHtml(tekst) {
-			var tmp = '<li data-content="' + escapeHtml(tekst.innhold) + '" class="standardtext">' +
-				'<span class="actionBtn">' + textIcon + 
-				'<span>' + escapeHtml(tekst.navn) + '</span>' +
-				'</span>' +
-				'</li>'
-
-			return tmp;
+		function createTextSpan(content) {
+			var elem = document.createElement('span');
+			elem.innerHTML = content;
+			return elem;
 		}
 
-		var htmlContent = '<ul>';
-	
+		function createFolderListItem(mappen) {
+			var elem = document.createElement('li');
+			elem.classList.add("folder", "closed");			
+
+			elem.appendChild(createFolderButton(mappen.navn));
+			
+			if (mappen.mapper.length > 0 || mappen.standardTekster.length > 0) {
+				var ul = document.createElement('ul');
+				ul.classList.add("folder-content", "hidden");
+
+				for (var j = 0; j < mappen.mapper.length; j++) {
+					ul.appendChild(createFolderListItem(mappen.mapper[j]));
+				}
+				
+				for (var k = 0; k < mappen.standardTekster.length; k++) {
+					ul.appendChild(createTextListItem(mappen.standardTekster[k]));
+				}
+
+				elem.appendChild(ul);
+			}
+
+			return elem;
+		}
+
+		function createTextListItem(text) {			
+			var elem = document.createElement('li');
+			elem.setAttribute('data-content', text.innhold);
+			elem.classList.add("standardtext");
+			elem.appendChild(createTextButton(text.navn));
+			return elem;
+		}
+
+		var list = document.createElement('ul');
+
 		for (var i = 0; i < mapper.length; i++) {
 			var mappe = mapper[i];
-			htmlContent += lagMappeHtml(mappe);
+			list.appendChild(createFolderListItem(mappe));
 		}
 	
-		htmlContent += '</ul>';
-	
+		console.log(list);
+
 		var enDiv = document.createElement('div');
-		enDiv.innerHTML = styleContent + htmlContent;
+		enDiv.innerHTML = styleContent + list.outerHTML;
 
 		this.setTemplate({
 			tag: 'div',				
