@@ -42,20 +42,20 @@ export default class Standardtekster extends Plugin {
 				}
 
 				function toggleFolder(event) {                   
-                    const icons = event.currentTarget.getElementsByClassName('folder-icon');
+                    const icons = event.currentTarget.getElementsByClassName('stdtext-folder-icon');
 
                     for (let i=0; i < icons.length; i++) {
                         const icon = icons[i];
 
                         if (icon.parentNode.parentNode == event.currentTarget) {
-                            icon.classList.toggle('hidden');
+                            icon.classList.toggle('stdtext-hidden');
                         }                            
                     }
 
 					const uls = event.currentTarget.getElementsByTagName('ul');
 
 					if (uls.length > 0) {
-						uls[0].classList.toggle('hidden');
+						uls[0].classList.toggle('stdtext-hidden');
 					}
 					
 					event.cancelBubble = true;
@@ -77,7 +77,7 @@ export default class Standardtekster extends Plugin {
 				stdTextView = new StandardteksterView(locale, Standardtekster.standardtekstMapper);
 				dropdownView.panelView.children.add( stdTextView );
 
-				const folderNodes = document.getElementsByClassName('folder');
+				const folderNodes = document.getElementsByClassName('stdtext-folder');
 				for (let i=0; i < folderNodes.length; i++) {
 					const node = folderNodes[i];
 					node.addEventListener('click', toggleFolder, false);
@@ -100,38 +100,35 @@ class StandardteksterView extends View {
 	constructor(locale, mapper) {
 		super(locale);
 
-		var styleContent = `
-		li > ul {
+		const styleContent = `
+		li.stdtext > ul {
 			padding-left: 20px !important;
 		}
-		li {
+		li.stdtext {
 			overflow: hidden !important;
 		}
-		.actionBtn {
+		.stdtext-actionBtn {
 			padding: 5px 10px 5px 10px !important;
 			display: block !important;
 		}
-		.actionBtn:hover {
+		.stdtext-actionBtn:hover {
 			background: #E0E0FF !important;
 			cursor: pointer !important;
 		}
-		.hidden {
+		.stdtext-hidden {
 			display: none;
-		}
-		.dropdown-container {
-			padding: 5px !important;
 		}`;
 
 		function createFolderClosedIcon() {
 			const elem = document.createElement('span');
-			elem.classList.add('folder-icon');
+			elem.classList.add('stdtext-folder-icon');
 			elem.innerHTML = folderIcon;
 			return elem;
 		}
 
 		function createFolderOpenIcon() {
 			const elem = document.createElement('span');
-			elem.className = 'folder-icon hidden';
+			elem.className = 'stdtext-folder-icon stdtext-hidden';
 			elem.innerHTML = folderOpenIcon;
 			return elem;
 		}
@@ -144,7 +141,7 @@ class StandardteksterView extends View {
 		
 		function createFolderButton(name) {
 			const btn = document.createElement('span');
-			btn.className = 'actionBtn';
+			btn.className = 'stdtext-actionBtn';
 			btn.appendChild(createFolderClosedIcon());
 			btn.appendChild(createFolderOpenIcon());
 			btn.appendChild(document.createTextNode(name));
@@ -153,7 +150,7 @@ class StandardteksterView extends View {
 				
 		function createTextButton(name) {
 			const btn = document.createElement('span');
-			btn.className = 'actionBtn';
+			btn.className = 'stdtext-actionBtn';
 			btn.appendChild(createTextIcon());
 			btn.appendChild(document.createTextNode(name));
 			return btn;
@@ -161,13 +158,13 @@ class StandardteksterView extends View {
 
 		function createFolderListItem(mappen) {
 			const elem = document.createElement('li');
-			elem.className = 'folder closed';
+			elem.className = 'stdtext stdtext-folder stdtext-closed';
 
 			elem.appendChild(createFolderButton(mappen.navn));
 			
 			if (mappen.mapper.length > 0 || mappen.standardTekster.length > 0) {
 				const ul = document.createElement('ul');
-				ul.className = 'folder-content hidden';
+				ul.className = 'stdtext-hidden';
 
 				for (let j = 0; j < mappen.mapper.length; j++) {
 					ul.appendChild(createFolderListItem(mappen.mapper[j]));
@@ -186,12 +183,12 @@ class StandardteksterView extends View {
 		function createTextListItem(text) {			
 			const elem = document.createElement('li');
 			elem.setAttribute('data-content', text.innhold);
-			elem.className = "standardtext";
+			elem.className = "stdtext standardtext";
 			elem.appendChild(createTextButton(text.navn));
 			return elem;
 		}
 
-		var list = document.createElement('ul');
+		const list = document.createElement('ul');
 
 		for (let i = 0; i < mapper.length; i++) {
 			const mappe = mapper[i];
@@ -203,10 +200,7 @@ class StandardteksterView extends View {
 
 		this.setTemplate({
 			tag: 'div',				
-			children: [style, list],
-			attributes: {
-				class: ['dropdown-container']
-			}
+			children: [style, list]
 		});
 	}
 }
