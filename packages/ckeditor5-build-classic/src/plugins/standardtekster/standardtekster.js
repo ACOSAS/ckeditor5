@@ -42,17 +42,17 @@ export default class Standardtekster extends Plugin {
 				}
 
 				function toggleFolder(event) {                   
-                    var icons = event.currentTarget.getElementsByClassName('folder-icon');
+                    const icons = event.currentTarget.getElementsByClassName('folder-icon');
 
-                    for (var i=0; i < icons.length; i++) {
-                        var icon = icons[i];
+                    for (let i=0; i < icons.length; i++) {
+                        const icon = icons[i];
 
                         if (icon.parentNode.parentNode == event.currentTarget) {
                             icon.classList.toggle('hidden');
                         }                            
                     }
 
-					var uls = event.currentTarget.getElementsByTagName('ul');
+					const uls = event.currentTarget.getElementsByTagName('ul');
 
 					if (uls.length > 0) {
 						uls[0].classList.toggle('hidden');
@@ -62,9 +62,7 @@ export default class Standardtekster extends Plugin {
 				}
 				
 				function clickText(event) {
-					console.log('Text clicked: ' + this.innerText);
-
-					var content = this.getAttribute("data-content");
+					const content = this.getAttribute("data-content");
 					const viewFragment = editor.data.processor.toView( content );
 					const modelFragment = editor.data.toModel( viewFragment );
 					editor.model.insertContent( modelFragment );
@@ -80,14 +78,14 @@ export default class Standardtekster extends Plugin {
 				dropdownView.panelView.children.add( stdTextView );
 
 				const folderNodes = document.getElementsByClassName('folder');
-				for (var i=0; i < folderNodes.length; i++) {
-					var node = folderNodes[i];
+				for (let i=0; i < folderNodes.length; i++) {
+					const node = folderNodes[i];
 					node.addEventListener('click', toggleFolder, false);
 				}
 
 				const standardtextNodes = document.getElementsByClassName('standardtext');
-				for (var i=0; i < standardtextNodes.length; i++) {
-					var node = standardtextNodes[i];
+				for (let i=0; i < standardtextNodes.length; i++) {
+					const node = standardtextNodes[i];
 					node.addEventListener('click', clickText, false);
 				}
 			} );
@@ -102,9 +100,7 @@ class StandardteksterView extends View {
 	constructor(locale, mapper) {
 		super(locale);
 
-		console.log('StdTextView', mapper);
-
-		var styleContent = `<style>
+		var styleContent = `
 		li > ul {
 			padding-left: 20px !important;
 		}
@@ -119,75 +115,65 @@ class StandardteksterView extends View {
 			background: #E0E0FF !important;
 			cursor: pointer !important;
 		}
-		.standardtext {
-			
-		}
 		.hidden {
 			display: none;
 		}
 		.dropdown-container {
 			padding: 5px !important;
-		}
-		</style>`;
+		}`;
 
 		function createFolderClosedIcon() {
-			var elem = document.createElement('span');
-			elem.classList.add("folder-icon");
+			const elem = document.createElement('span');
+			elem.classList.add('folder-icon');
 			elem.innerHTML = folderIcon;
 			return elem;
 		}
 
 		function createFolderOpenIcon() {
-			var elem = document.createElement('span');
-			elem.classList.add("folder-icon", "hidden");
+			const elem = document.createElement('span');
+			elem.className = 'folder-icon hidden';
 			elem.innerHTML = folderOpenIcon;
 			return elem;
 		}
 		
 		function createTextIcon() {
-			var elem = document.createElement('span');
+			const elem = document.createElement('span');
 			elem.innerHTML = textIcon;
 			return elem;
 		}
 		
 		function createFolderButton(name) {
-			var btn = document.createElement('span');
-			btn.classList.add("actionBtn");
+			const btn = document.createElement('span');
+			btn.className = 'actionBtn';
 			btn.appendChild(createFolderClosedIcon());
 			btn.appendChild(createFolderOpenIcon());
-			btn.appendChild(createTextSpan(name));
+			btn.appendChild(document.createTextNode(name));
 			return btn;
 		}
 				
 		function createTextButton(name) {
-			var btn = document.createElement('span');
-			btn.classList.add("actionBtn");
+			const btn = document.createElement('span');
+			btn.className = 'actionBtn';
 			btn.appendChild(createTextIcon());
-			btn.appendChild(createTextSpan(name));
+			btn.appendChild(document.createTextNode(name));
 			return btn;
 		}
 
-		function createTextSpan(content) {
-			var elem = document.createElement('span');
-			elem.innerHTML = content;
-			return elem;
-		}
-
 		function createFolderListItem(mappen) {
-			var elem = document.createElement('li');
-			elem.classList.add("folder", "closed");			
+			const elem = document.createElement('li');
+			elem.className = 'folder closed';
 
 			elem.appendChild(createFolderButton(mappen.navn));
 			
 			if (mappen.mapper.length > 0 || mappen.standardTekster.length > 0) {
-				var ul = document.createElement('ul');
-				ul.classList.add("folder-content", "hidden");
+				const ul = document.createElement('ul');
+				ul.className = 'folder-content hidden';
 
-				for (var j = 0; j < mappen.mapper.length; j++) {
+				for (let j = 0; j < mappen.mapper.length; j++) {
 					ul.appendChild(createFolderListItem(mappen.mapper[j]));
 				}
 				
-				for (var k = 0; k < mappen.standardTekster.length; k++) {
+				for (let k = 0; k < mappen.standardTekster.length; k++) {
 					ul.appendChild(createTextListItem(mappen.standardTekster[k]));
 				}
 
@@ -198,28 +184,26 @@ class StandardteksterView extends View {
 		}
 
 		function createTextListItem(text) {			
-			var elem = document.createElement('li');
+			const elem = document.createElement('li');
 			elem.setAttribute('data-content', text.innhold);
-			elem.classList.add("standardtext");
+			elem.className = "standardtext";
 			elem.appendChild(createTextButton(text.navn));
 			return elem;
 		}
 
 		var list = document.createElement('ul');
 
-		for (var i = 0; i < mapper.length; i++) {
-			var mappe = mapper[i];
+		for (let i = 0; i < mapper.length; i++) {
+			const mappe = mapper[i];
 			list.appendChild(createFolderListItem(mappe));
 		}
-	
-		console.log(list);
 
-		var enDiv = document.createElement('div');
-		enDiv.innerHTML = styleContent + list.outerHTML;
+		const style = document.createElement('style');
+		style.textContent = styleContent;
 
 		this.setTemplate({
 			tag: 'div',				
-			children: [enDiv],
+			children: [style, list],
 			attributes: {
 				class: ['dropdown-container']
 			}
