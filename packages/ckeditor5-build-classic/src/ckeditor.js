@@ -34,13 +34,22 @@ import Base64UploadAdapter from '@ckeditor/ckeditor5-upload/src/adapters/base64u
 import ImageResize from '@ckeditor/ckeditor5-image/src/imageresize';
 import Standardtekster from '../src/plugins/standardtekster/standardtekster';
 
-export default class ClassicEditor extends ClassicEditorBase {
-}
+import ObservableMixin from '@ckeditor/ckeditor5-utils/src/observablemixin';
+import mix from '@ckeditor/ckeditor5-utils/src/mix';
 
-ClassicEditor.settStandardTekster = function(mapper) {
-	ClassicEditor.defaultConfig.toolbar.items.push('standardtekster');
-	Standardtekster.standardtekstMapper = mapper;
-};
+export default class ClassicEditor extends ClassicEditorBase {
+
+	constructor() {
+		super();
+		this.standardTekster = [];
+		this.set('harStandardTekster', false);
+	}
+
+	settStandardTekster(mapper) {		
+		this.standardTekster = mapper;
+		this.set('harStandardTekster', mapper && mapper.length > 0);
+	}
+}
 
 // Plugins to include in the build.
 ClassicEditor.builtinPlugins = [
@@ -95,7 +104,8 @@ ClassicEditor.defaultConfig = {
 			'imageUpload',
 			'insertTable',
 			'undo',
-			'redo'
+			'redo',
+			'standardtekster'
 		]
 	},
 	image: {
@@ -116,3 +126,5 @@ ClassicEditor.defaultConfig = {
 	// This value must be kept in sync with the language defined in webpack.config.js.
 	language: 'nb'
 };
+
+mix(ClassicEditor, ObservableMixin);

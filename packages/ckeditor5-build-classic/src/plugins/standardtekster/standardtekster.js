@@ -18,7 +18,6 @@ export default class Standardtekster extends Plugin {
     }
     
     init() {
-		console.log("Standardtekster plugin init");
         const editor = this.editor;
         const t = editor.t;
 
@@ -33,6 +32,8 @@ export default class Standardtekster extends Plugin {
 				label: t( 'Sett inn standardtekst' ),
 				tooltip: true
 			} );
+
+			dropdownView.buttonView.bind('isVisible').to( editor, 'harStandardTekster');
 
 			let stdTextView;
 
@@ -74,7 +75,7 @@ export default class Standardtekster extends Plugin {
 					event.cancelBubble = true;
 				}
 
-				stdTextView = new StandardteksterView(locale, Standardtekster.standardtekstMapper);
+				stdTextView = new StandardteksterView(locale, editor.standardTekster);
 				dropdownView.panelView.children.add( stdTextView );
 
 				const folderNodes = document.getElementsByClassName('stdtext-folder');
