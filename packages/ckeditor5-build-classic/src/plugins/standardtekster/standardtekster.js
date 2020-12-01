@@ -78,13 +78,13 @@ export default class Standardtekster extends Plugin {
 				stdTextView = new StandardteksterView(locale, editor.standardTekster);
 				dropdownView.panelView.children.add( stdTextView );
 
-				const folderNodes = document.getElementsByClassName('stdtext-folder');
+				const folderNodes = stdTextView.element.getElementsByClassName('stdtext-folder');
 				for (let i=0; i < folderNodes.length; i++) {
 					const node = folderNodes[i];
 					node.addEventListener('click', toggleFolder, false);
 				}
 
-				const standardtextNodes = document.getElementsByClassName('standardtext');
+				const standardtextNodes = stdTextView.element.getElementsByClassName('standardtext');
 				for (let i=0; i < standardtextNodes.length; i++) {
 					const node = standardtextNodes[i];
 					node.addEventListener('click', clickText, false);
