@@ -18,9 +18,9 @@ import Subscript from '@ckeditor/ckeditor5-basic-styles/src/subscript';
 import Superscript from '@ckeditor/ckeditor5-basic-styles/src/superscript';
 import EasyImage from '@ckeditor/ckeditor5-easy-image/src/easyimage';
 import Image from '@ckeditor/ckeditor5-image/src/image';
-import ImageCaption from '@ckeditor/ckeditor5-image/src/imagecaption';
-import ImageStyle from '@ckeditor/ckeditor5-image/src/imagestyle';
-import ImageToolbar from '@ckeditor/ckeditor5-image/src/imagetoolbar';
+//import ImageCaption from '@ckeditor/ckeditor5-image/src/imagecaption';
+//import ImageStyle from '@ckeditor/ckeditor5-image/src/imagestyle';
+//import ImageToolbar from '@ckeditor/ckeditor5-image/src/imagetoolbar';
 import ImageUpload from '@ckeditor/ckeditor5-image/src/imageupload';
 import Indent from '@ckeditor/ckeditor5-indent/src/indent';
 import Link from '@ckeditor/ckeditor5-link/src/link';
@@ -45,9 +45,128 @@ export default class ClassicEditor extends ClassicEditorBase {
 		this.set('harStandardTekster', false);
 	}
 
-	settStandardTekster(mapper) {		
+	settStandardTekster(mapper) {
 		this.standardTekster = mapper;
 		this.set('harStandardTekster', mapper && mapper.length > 0);
+	}
+
+	setData(data) {
+		console.log("setData before blob conversion", data);
+		const html = this.convertBase64ImagesToBlob(data);
+		console.log("setData after blob conversion", html);
+		super.setData(html);
+	}
+
+	async getData() {
+		const html = super.getData();
+
+		const parser = new DOMParser();
+		const doc = parser.parseFromString(html, 'text/html');
+		if (!doc || !doc.body) {
+			return '';
+		}
+	
+		const elts = Array.from(doc.querySelectorAll('img[src^="blob:"]'));
+	
+		await Promise.all(elts.map(async (elt) => {
+			this.removeFigureNode(elt);
+			const dataUri = await this.getBase64FromBlob(elt.src)			
+			elt.src = dataUri;
+		}));
+
+		return doc.body.innerHTML;
+	}
+
+	removeFigureNode(img) {
+		let figureNode = img.parentNode;
+		if (figureNode && figureNode.tagName.toLowerCase() == 'figure') {
+			let figureParent = figureNode.parentNode;
+
+			if (figureParent) {
+				var width = figureNode.style.getPropertyValue('width');
+				if (width) {
+					img.width = width.replace('px', '');
+				}
+
+				figureNode.removeChild(img);
+				figureParent.insertBefore(img, figureNode);
+				figureParent.removeChild(figureNode);
+			}
+		}
+	}
+
+	downloadData(url) {
+		return new Promise((resolve, reject) => {
+			const req = new XMLHttpRequest();
+			req.open('GET', url, true);
+			req.responseType = 'blob';
+	
+			req.addEventListener('load', () => resolve(req.response), {
+				once: true,
+				passive: true,
+				capture: true,
+			});
+	
+			req.addEventListener('error', () => reject({
+				status: req.status,
+				statusMsg: req.statusText,
+				body: req.responseText,
+			}), {
+				once: true,
+				passive: true,
+				capture: true,
+			});
+	
+			req.send()
+		});
+	}
+	
+	async getBase64FromBlob(blobUri) {
+		const data = await this.downloadData(blobUri);
+		return await new Promise(function (resolve, reject) {
+			const reader = new FileReader();
+	
+			reader.addEventListener('load', function () {
+				resolve(reader.result);
+			});
+			reader.addEventListener('error', reject);
+			reader.readAsDataURL(data);
+		});
+	}
+
+	convertBase64ImagesToBlob(html) {
+		const parser = new DOMParser();
+		const doc = parser.parseFromString(html, 'text/html');
+	
+		const dataImgs = Array.from(doc.querySelectorAll('img[src^="data:"]'));
+	
+		dataImgs.map(img => {	
+			const blob = this.convertDataUriToBlob(img.src);
+			const src = URL.createObjectURL(blob);
+			img.src = src;
+		});
+	
+		return doc && doc.body ? doc.body.innerHTML : '';
+	}
+	
+	convertDataUriToBlob(dataUri) {
+		const arr = this.convertDataURIToBinary(dataUri);
+		const mime = dataUri.substring('data:'.length, dataUri.indexOf(';'));
+		return new Blob([arr], { type: mime });
+	}
+
+	convertDataURIToBinary(dataUri) {
+		const BASE64_MARKER = ';base64,';
+		const base64Index = dataUri.indexOf(BASE64_MARKER) + BASE64_MARKER.length;
+		const base64 = dataUri.substring(base64Index);
+		const raw = window.atob(base64);
+		const rawLength = raw.length;
+		const array = new Uint8Array(rawLength);
+	
+		for (let i = 0; i < rawLength; i++) {
+			array[i] = raw.charCodeAt(i);
+		}
+		return array;
 	}
 }
 
@@ -63,9 +182,9 @@ ClassicEditor.builtinPlugins = [
 	Superscript,
 	EasyImage,
 	Image,
-	ImageCaption,
-	ImageStyle,
-	ImageToolbar,
+	//ImageCaption,
+//	ImageStyle,
+//	ImageToolbar,
 	ImageUpload,
 	Indent,
 	Link,
@@ -109,6 +228,7 @@ ClassicEditor.defaultConfig = {
 		]
 	},
 	image: {
+		resizeUnit: 'px',
 		styles: [
 			'alignLeft', 'alignCenter', 'alignRight'
 		],

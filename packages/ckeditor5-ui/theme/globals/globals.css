@@ -18,3 +18,7 @@
 .ck ol ol ol ol ol ol ol ol { list-style: lower-alpha; }
 .ck ol ol ol ol ol ol ol ol ol { list-style: lower-roman; }
 .ck ol ol ol ol ol ol ol ol ol ol { list-style: none; }
+
+.image.ck-widget {
+    margin-left: 0 !important;
+}

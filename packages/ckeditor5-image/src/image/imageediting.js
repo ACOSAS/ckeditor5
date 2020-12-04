@@ -81,8 +81,16 @@ export default class ImageEditing extends Plugin {
 					attributes: {
 						src: true
 					}
-				},
-				model: ( viewImage, { writer } ) => writer.createElement( 'image', { src: viewImage.getAttribute( 'src' ) } )
+				},		
+				model: ( viewImage, { writer } ) => { 
+					let imgObj = { src: viewImage.getAttribute( 'src' ) };
+
+					const width = viewImage.getAttribute( 'width' );
+					if (width)
+						imgObj.width = width + 'px';
+
+					return writer.createElement( 'image', imgObj ); 
+				} 
 			} )
 			.attributeToAttribute( {
 				view: {
@@ -128,7 +136,7 @@ export default class ImageEditing extends Plugin {
 // @returns {module:engine/view/containerelement~ContainerElement}
 export function createImageViewElement( writer ) {
 	const emptyElement = writer.createEmptyElement( 'img' );
-	const figure = writer.createContainerElement( 'figure', { class: 'image' } );
+	const figure = writer.createContainerElement( 'figure', { class: 'image', style: 'max-width: 600px' } );
 
 	writer.insert( writer.createPositionAt( figure, 0 ), emptyElement );
 
