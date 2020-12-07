@@ -22,3 +22,9 @@
 .image.ck-widget {
     margin-left: 0 !important;
 }
+
+.table.ck-widget {
+    margin-left: 0 !important;
+    max-width: 600px;
+    word-break: break-word  ;
+}
