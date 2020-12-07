@@ -9,7 +9,8 @@
 	text-align: center;
 
 	/* Make sure there is some space between the content and the image. Center image by default. */
-	margin: 1em auto;
+	/* margin: 1em auto; */
+	margin-left: 0;
 
 	& img {
 		/* Prevent unnecessary margins caused by line-height (see #44). */

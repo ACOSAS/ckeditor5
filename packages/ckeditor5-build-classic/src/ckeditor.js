@@ -66,18 +66,22 @@ export default class ClassicEditor extends ClassicEditorBase {
 			return '';
 		}
 	
-		const elts = Array.from(doc.querySelectorAll('img[src^="blob:"]'));
+		const images = Array.from(doc.querySelectorAll('img[src^="blob:"]'));
 	
-		await Promise.all(elts.map(async (elt) => {
-			this.removeFigureNode(elt);
+		await Promise.all(images.map(async elt => {
+			this.removeImageFigureNode(elt);
 			const dataUri = await this.getBase64FromBlob(elt.src)			
 			elt.src = dataUri;
 		}));
 
+		const tables = Array.from(doc.querySelectorAll('table'));
+		tables.map(elt => this.removeTableFigureNode(elt));
+
+		console.log('getData etter endring', doc.body.innerHTML);
 		return doc.body.innerHTML;
 	}
 
-	removeFigureNode(img) {
+	removeImageFigureNode(img) {
 		let figureNode = img.parentNode;
 		if (figureNode && figureNode.tagName.toLowerCase() == 'figure') {
 			let figureParent = figureNode.parentNode;
@@ -90,6 +94,21 @@ export default class ClassicEditor extends ClassicEditorBase {
 
 				figureNode.removeChild(img);
 				figureParent.insertBefore(img, figureNode);
+				figureParent.removeChild(figureNode);
+			}
+		}
+	}
+
+	removeTableFigureNode(table) {
+		table.style.maxWidth = '600px';
+
+		let figureNode = table.parentNode;
+		if (figureNode && figureNode.tagName.toLowerCase() == 'figure') {
+			let figureParent = figureNode.parentNode;
+
+			if (figureParent) {
+				figureNode.removeChild(table);
+				figureParent.insertBefore(table, figureNode);
 				figureParent.removeChild(figureNode);
 			}
 		}
