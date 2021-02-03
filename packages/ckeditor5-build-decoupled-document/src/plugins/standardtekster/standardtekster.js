@@ -30,11 +30,12 @@ export default class Standardtekster extends Plugin {
 			dropdownView.buttonView.set( {
 				icon: textIcon,
 				label: t( 'Sett inn standardtekst' ),
-				tooltip: true,
-				enabled: false
+				tooltip: true
 			} );
 
 			dropdownView.buttonView.bind('isVisible').to( editor, 'harStandardTekster');
+			dropdownView.buttonView.unbind('isEnabled');
+			dropdownView.buttonView.bind('isEnabled').to( editor, 'isReadOnly', value => !value);
 
 			let stdTextView;
 
@@ -64,6 +65,7 @@ export default class Standardtekster extends Plugin {
 					}
 					
 					event.cancelBubble = true;
+					editor.editing.view.focus();
 				}
 				
 				function clickText(event) {

@@ -35,9 +35,10 @@ import TextTransformation from '@ckeditor/ckeditor5-typing/src/texttransformatio
 import Base64UploadAdapter from '@ckeditor/ckeditor5-upload/src/adapters/base64uploadadapter';
 import ImageResize from '@ckeditor/ckeditor5-image/src/imageresize';
 import Standardtekster from '../src/plugins/standardtekster/standardtekster';
+import CloudServices from '@ckeditor/ckeditor5-cloud-services/src/cloudservices';
 
-import ObservableMixin from '@ckeditor/ckeditor5-utils/src/observablemixin';
-import mix from '@ckeditor/ckeditor5-utils/src/mix';
+// import ObservableMixin from '@ckeditor/ckeditor5-utils/src/observablemixin';
+// import mix from '@ckeditor/ckeditor5-utils/src/mix';
 
 export default class DecoupledEditor extends DecoupledEditorBase {
 
@@ -200,6 +201,7 @@ DecoupledEditor.builtinPlugins = [
 	Strikethrough,
 	Subscript,
 	Superscript,
+	CloudServices,
 	EasyImage,
 	Image,
 	//ImageCaption,
