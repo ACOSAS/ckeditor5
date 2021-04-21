@@ -75,7 +75,6 @@ export default class DecoupledEditor extends DecoupledEditorBase {
 		const tables = Array.from(doc.querySelectorAll("table"));
 		tables.map((elt) => this.removeTableFigureNode(elt));
 
-		console.log("getData etter endring", doc.body.innerHTML);
 		return doc.body.innerHTML;
 	}
 
